@@ -1,0 +1,2 @@
+feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version
+RTD,http://rtd-denver.com,en,20200419,20210109,Merged-25916M25860-20200530-035819-Pan20 and May20
