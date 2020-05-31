@@ -53,6 +53,11 @@ public class BusPosition {
 		this.current_status = current_status;
 	}
 	
-	
+	public String toString(){
+		
+		String s = "Bus " + this.getTrip_id() + " with position " + this.getLocation().toString();
+		String v = this.getLocation().toString();
+		return v;
+	}
 	
 }
