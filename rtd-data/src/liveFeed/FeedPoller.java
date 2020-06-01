@@ -13,6 +13,8 @@ import kong.unirest.Unirest;
 
 public class FeedPoller {
 	
+	//Vehicle position data are stored in Google Protocol Buffer format, which is downloadable from server with credentials: 
+	
 	public final String username = "RTDgtfsRT";
 	public final String password = "realT!m3Feed";
 	public final String url = "http://www.rtd-denver.com/google_sync/VehiclePosition.pb";
@@ -27,7 +29,6 @@ public class FeedPoller {
 		long currentCallSeconds = instant.getEpochSecond();
 		
 		if (currentCallSeconds - previousCallSeconds > this.secondBuffer) {
-			
 
 			Unirest.get(url).basicAuth(this.username, this.password).thenConsume(rawResponse -> {
 								

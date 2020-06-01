@@ -18,6 +18,13 @@ public class RoutesReader {
 	public List<String> route_url = new ArrayList<String>();
 	public List<String> route_desc = new ArrayList<String>();
 	public List<String> route_short_name = new ArrayList<String>();
+	public List<Route> routes = new ArrayList<Route>();
+	
+	public RoutesReader() throws IOException {
+		
+		this.readRoutes();
+		this.parseRoutes();
+	}
 	
 	public void readRoutes() throws IOException {
 		
@@ -66,12 +73,14 @@ public class RoutesReader {
 	                	route_id.add(token);
 
 	            	}
-	            	else if (index == 5) {
+	            	/*
+	            	else if (index == 6) {
 	            		
 	                	route_url.add(token);
 
 	            	}
-	            	else if (index == 5) {
+	            	*/
+	            	else if (index == 7) {
 	            		
 	                	route_desc.add(token);
 	            		
@@ -93,11 +102,37 @@ public class RoutesReader {
 		bufferedReader.close();
 	}
 	
+	public void parseRoutes() {
+		
+		for (int i = 0; i < this.route_color.size(); i++) {
+			
+			/*
+			System.out.println("long " + route_long_name.get(i));
+			System.out.println("type " + route_type.get(i));
+			System.out.println("text color " + route_text_color.get(i));
+			System.out.println("color " + route_color.get(i));
+			System.out.println("agency " + agency_id.get(i));
+			System.out.println("id " + route_id.get(i));
+			System.out.println("desc " + route_desc.get(i));
+			*/
+			
+			Route r = new Route(this.route_long_name.get(i), this.route_type.get(i), this.route_text_color.get(i),
+					this.route_color.get(i), this.agency_id.get(i), this.route_id.get(i),
+					this.route_desc.get(i));
+			
+			this.routes.add(r);
+		}
+	}
+	
 	public static void main(String[] args) throws IOException {
 		
 		RoutesReader routeReader = new RoutesReader();
-		routeReader.readRoutes();
-		System.out.println(routeReader.route_id.size());
+		
+		for (Route r: routeReader.routes) {
+			
+			System.out.println(r);
+		}
+		
 	}
 	
 	public List<String> getRoute_long_name() {
