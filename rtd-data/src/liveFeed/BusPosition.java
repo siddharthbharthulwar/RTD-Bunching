@@ -55,9 +55,8 @@ public class BusPosition {
 	
 	public String toString(){
 		
-		String s = "Bus " + this.getTrip_id() + " with position " + this.getLocation().toString();
-		String v = this.getLocation().toString();
-		return v;
+		String s = "Bus " + this.getTrip_id() ;//+ " with lat " + this.getLocation().getLatitude() + ", lon " + this.getLocation().getLongitude();
+		return s;
 	}
 	
 }

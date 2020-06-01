@@ -29,9 +29,7 @@ public class FeedPoller {
 			
 
 			Unirest.get(url).basicAuth(this.username, this.password).thenConsume(rawResponse -> {
-				
-				System.out.println("This worked");
-				
+								
 				InputStream stream = rawResponse.getContent();
 				try {
 					GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(stream);
@@ -47,7 +45,7 @@ public class FeedPoller {
 						busPosition.setTrip_id(vehiclePosition.getTrip().getTripId());
 						busPosition.setTimestamp(vehiclePosition.getTimestamp());
 						
-						System.out.println(busPosition.getLocation().getClass());
+						System.out.println(busPosition.getTrip_id() + " w/ location " + location);
 						
 					}
 				} 
@@ -56,18 +54,14 @@ public class FeedPoller {
 					e.printStackTrace();
 				}
 				
-				
 			});
 			
 			this.write();
-			
 		}
-		
 		else {
 			
-			System.out.println("ERROR: WAIT " + (30 - (currentCallSeconds - previousCallSeconds)) +  " SECONDS BEFORE CALLING FUNCTION AGAIN");
+			System.out.println("ERROR: WAIT " + (35 - (currentCallSeconds - previousCallSeconds)) +  " SECONDS BEFORE CALLING FUNCTION AGAIN");
 		}
-		
 	}
 	
 	public long read() throws IOException {
