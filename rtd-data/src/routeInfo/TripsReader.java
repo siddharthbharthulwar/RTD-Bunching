@@ -18,65 +18,71 @@ public class TripsReader {
 	public List<String> service_id = new ArrayList<String>();
 	public List<String> trip_id = new ArrayList<String>();
 	
+	public TripsReader() throws IOException {
+		
+		this.readTrips();
+	}
+	
 	public void readTrips() throws IOException {
 		
 		FileReader reader = new FileReader("res/trips.txt");
 		BufferedReader bufferedReader = new BufferedReader(reader);
-		
 		String line;
 		int lineIndex = 0;
 		
 		while ((line = bufferedReader.readLine()) != null) {
 			if (lineIndex > 0) {
+				
 				StringTokenizer st = new StringTokenizer(line, ",");
 	            int index = 0;
+	            
 	            while (st.hasMoreTokens()) {
+	            	
+	            	String token = st.nextToken();
 	            	
 	            	if (index == 0) {
 	            		
-	                	block_id.add(st.nextToken());
+	                	block_id.add(token);
 	                	
 	            	}
 	            	else if (index == 1) {
 	            		
-	                	route_id.add(st.nextToken());
+	                	route_id.add(token);
 
 	            	}
 	            	else if (index == 2) {
 	            		
-	            		String s = st.nextToken();
-	            		if (s != null) {
-	            			System.out.println(s);
-	            			direction_id.add(Integer.valueOf(s));
-	            		}
+	            		direction_id.add(Integer.valueOf(token));
 
 	            	}
 	            	else if (index == 3) {
 
-	                	trip_headsign.add(st.nextToken());
+	                	trip_headsign.add(token);
 
 	            	}
 	            	else if (index == 4) {
 	            		
-	                	shape_id.add(st.nextToken());
+	                	shape_id.add(token);
 
 	            	}
 	            	else if (index == 5) {
 	            		
-	                	service_id.add(st.nextToken());
+	                	service_id.add(token);
 	            		
 
 	            	}
 	            	else {
 	            		
-	                	trip_id.add(st.nextToken());	
+	                	trip_id.add(token);	
 	          
 	            	}
 	            	
 	            	index++;
 	            }
-
 			}
+			
+			lineIndex++;
+			
         }
 		
 		bufferedReader.close();
@@ -86,6 +92,7 @@ public class TripsReader {
 	{
 		TripsReader tr = new TripsReader();
 		tr.readTrips();
+		
 		System.out.println(tr.block_id.size());
 		System.out.println(tr.route_id.size());
 		System.out.println(tr.direction_id.size());
@@ -93,8 +100,8 @@ public class TripsReader {
 		System.out.println(tr.shape_id.size());
 		System.out.println(tr.service_id.size());
 		System.out.println(tr.trip_id.size());
-
 		
+
 	}
 	
 }

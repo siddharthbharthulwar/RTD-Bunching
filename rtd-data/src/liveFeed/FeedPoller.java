@@ -16,6 +16,7 @@ public class FeedPoller {
 	public final String username = "RTDgtfsRT";
 	public final String password = "realT!m3Feed";
 	public final String url = "http://www.rtd-denver.com/google_sync/VehiclePosition.pb";
+	public final int secondBuffer = 31;
 	
 	//DO NOT CALL THIS FUNCTION MORE THAN ONCE EVERY THIRTY SECONDS
 	
@@ -25,7 +26,7 @@ public class FeedPoller {
 		Instant instant = Instant.now();
 		long currentCallSeconds = instant.getEpochSecond();
 		
-		if (currentCallSeconds - previousCallSeconds > 35) {
+		if (currentCallSeconds - previousCallSeconds > this.secondBuffer) {
 			
 
 			Unirest.get(url).basicAuth(this.username, this.password).thenConsume(rawResponse -> {
@@ -46,10 +47,9 @@ public class FeedPoller {
 						busPosition.setTimestamp(vehiclePosition.getTimestamp());
 						
 						System.out.println(busPosition.getTrip_id() + " w/ location " + location);
-						
 					}
 				} 
-				
+
 				catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -60,7 +60,7 @@ public class FeedPoller {
 		}
 		else {
 			
-			System.out.println("ERROR: WAIT " + (35 - (currentCallSeconds - previousCallSeconds)) +  " SECONDS BEFORE CALLING FUNCTION AGAIN");
+			System.out.println("ERROR: WAIT " + (this.secondBuffer - (currentCallSeconds - previousCallSeconds)) +  " SECONDS BEFORE CALLING FUNCTION AGAIN");
 		}
 	}
 	
