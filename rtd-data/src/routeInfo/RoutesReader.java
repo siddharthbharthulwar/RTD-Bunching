@@ -106,16 +106,6 @@ public class RoutesReader {
 		
 		for (int i = 0; i < this.route_color.size(); i++) {
 			
-			/*
-			System.out.println("long " + route_long_name.get(i));
-			System.out.println("type " + route_type.get(i));
-			System.out.println("text color " + route_text_color.get(i));
-			System.out.println("color " + route_color.get(i));
-			System.out.println("agency " + agency_id.get(i));
-			System.out.println("id " + route_id.get(i));
-			System.out.println("desc " + route_desc.get(i));
-			*/
-			
 			Route r = new Route(this.route_long_name.get(i), this.route_type.get(i), this.route_text_color.get(i),
 					this.route_color.get(i), this.agency_id.get(i), this.route_id.get(i),
 					this.route_desc.get(i));

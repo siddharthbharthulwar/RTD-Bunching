@@ -17,6 +17,7 @@ public class TripsReader {
 	public List<String> shape_id = new ArrayList<String>();
 	public List<String> service_id = new ArrayList<String>();
 	public List<String> trip_id = new ArrayList<String>();
+	public List<Trip> trips = new ArrayList<Trip>();
 	
 	public TripsReader() throws IOException {
 		
@@ -81,26 +82,34 @@ public class TripsReader {
 	            }
 			}
 			
-			lineIndex++;
-			
+			lineIndex++;			
         }
 		
 		bufferedReader.close();
+	}
+	
+	public void parseTrips() {
+		
+		for (int i = 0; i < this.direction_id.size(); i++) {
+			
+			Trip t = new Trip(this.block_id.get(i), this.route_id.get(i), this.direction_id.get(i),
+					this.trip_headsign.get(i), this.shape_id.get(i), this.service_id.get(i), 
+					this.trip_id.get(i));
+			
+			this.trips.add(t);
+		}
 	}
 	
 	public static void main(String[] args) throws IOException
 	{
 		TripsReader tr = new TripsReader();
 		tr.readTrips();
+		tr.parseTrips();
 		
-		System.out.println(tr.block_id.size());
-		System.out.println(tr.route_id.size());
-		System.out.println(tr.direction_id.size());
-		System.out.println(tr.trip_headsign.size());
-		System.out.println(tr.shape_id.size());
-		System.out.println(tr.service_id.size());
-		System.out.println(tr.trip_id.size());
-		
+		for (Trip t: tr.trips) {
+			
+			System.out.println(t);
+		}
 
 	}
 	
