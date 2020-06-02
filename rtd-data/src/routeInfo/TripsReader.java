@@ -22,6 +22,7 @@ public class TripsReader {
 	public TripsReader() throws IOException {
 		
 		this.readTrips();
+		this.parseTrips();
 	}
 	
 	public void readTrips() throws IOException {
@@ -100,17 +101,9 @@ public class TripsReader {
 		}
 	}
 	
-	public static void main(String[] args) throws IOException
-	{
-		TripsReader tr = new TripsReader();
-		tr.readTrips();
-		tr.parseTrips();
+	public List<Trip> getTrips(){
 		
-		for (Trip t: tr.trips) {
-			
-			System.out.println(t);
-		}
-
+		return this.trips;
 	}
-	
+
 }

@@ -1,6 +1,6 @@
 package util;
 
-import liveFeed.Location;
+import liveFeed.BusLocation;
 
 public class MathUtil {
 
@@ -8,7 +8,7 @@ public class MathUtil {
 		return value * Math.PI / 180;
 	}
 	
-	public static Double haversine(Location l1, Location l2) {
+	public static Double haversine(BusLocation l1, BusLocation l2) {
 		
 		final int R = 6371;
 		Double latDistance = toRad(l1.getLatitude()-l2.getLatitude());
@@ -24,11 +24,11 @@ public class MathUtil {
 	
 	public static void main(String[] args)
 	{
-		Location l1 = new Location();
+		BusLocation l1 = new BusLocation();
 		l1.setLatitude(0);
 		l1.setLongitude(0);
 		
-		Location l2 = new Location();
+		BusLocation l2 = new BusLocation();
 		l2.setLatitude(1);
 		l2.setLongitude(1);
 		

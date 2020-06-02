@@ -1,7 +1,5 @@
 package routeInfo;
 
-import liveFeed.BusPosition;
-
 
 public class Route {
 

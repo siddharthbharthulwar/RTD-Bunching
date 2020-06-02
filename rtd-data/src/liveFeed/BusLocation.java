@@ -1,13 +1,14 @@
 package liveFeed;
 
-public class Location {
+public class BusLocation {
 
 	private double latitude;
 	private double longitude;
+	private long timestamp;
 	
 	public String toString() {
 		
-		String s = this.latitude + ", " + this.longitude;
+		String s = "(" + this.latitude + ", " + this.longitude + ") | " + this.timestamp;
 		return s;
 	}
 
@@ -25,6 +26,16 @@ public class Location {
 
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
+	}
+	
+	public long getTimestamp() {
+		
+		return this.timestamp;
+	}
+	
+	public void setTimestamp(long timestamp) {
+		
+		this.timestamp = timestamp;
 	}
 	
 	

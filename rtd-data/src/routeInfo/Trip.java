@@ -1,5 +1,10 @@
 package routeInfo;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import liveFeed.BusLocation;
+
 public class Trip {
 
 	private String block_id;
@@ -9,6 +14,8 @@ public class Trip {
 	private String shape_id;
 	private String service_id;
 	private String trip_id;
+	
+	public List<BusLocation> locations = new ArrayList<BusLocation>();
 	
 	public Trip(String block_id, String route_id, int direction_id, String trip_headsign, String shape_id,
 			String service_id, String trip_id) {
@@ -24,7 +31,7 @@ public class Trip {
 	
 	public String toString() {
 		
-		String s = this.route_id + " in direction " + this.direction_id + " : " + this.trip_headsign;
+		String s = this.trip_id + " in direction " + this.direction_id + " : " + this.trip_headsign;
 		return s;
 	}
 
