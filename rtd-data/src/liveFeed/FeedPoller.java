@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.google.transit.realtime.GtfsRealtime;
 import kong.unirest.Unirest;
@@ -25,7 +27,7 @@ public class FeedPoller {
 	public final String username = "RTDgtfsRT";
 	public final String password = "realT!m3Feed";
 	public final String url = "http://www.rtd-denver.com/google_sync/VehiclePosition.pb";
-	public final int secondBuffer = 31;
+	public final int secondBuffer = 33;
 	
 	public TripsReader tripsReader;
 	//public RoutesReader routesReader;  THIS PROBABLY ISNT NEEDED RIGHT NOW 
@@ -120,34 +122,54 @@ public class FeedPoller {
 		writer.close();
 	}
 	
-	public void mainOperation(long minutes) throws IOException {
+	public void timedOperation(long minutes, int timeInterval, FeedPoller poller) {
 		
-		FeedPoller poller = new FeedPoller();
+		timeInterval = 1000 * timeInterval;
+		Timer timer = new Timer();
+		int begin = 0;
 		Instant instant = Instant.now();
-		long timeStampSeconds = instant.getEpochSecond();
+		long beginningTime = instant.getEpochSecond();
 		
-		System.out.println("Executed at " + timeStampSeconds);
-		
-		while (timeStampSeconds < (60 * minutes) + timeStampSeconds) {
-			
-			instant = Instant.now();
-			long currentSeconds = instant.getEpochSecond();
-			
-			if (currentSeconds - timeStampSeconds % 35 == 0) {
-				
+		timer.schedule(new TimerTask() {
+		   @Override
+		   public void run() {
+			   try {
 				poller.getBusPositions();
+				for (Trip t: poller.tripsReader.getTrips()) {
+					
+					String key = t.getTrip_id();
+					
+					List<BusLocation> location = poller.trips.get(key);
+					
+					if (location.size() > 0) {
+						
+						System.out.println(location.size() + " | " + key);
+						
+					}
+					
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-		}
-		
+		       Instant instant2 = Instant.now();
+		       long endingTime = instant2.getEpochSecond();
+		       System.out.println("Time: " + (endingTime - beginningTime));
+		       
+		       if ((endingTime - beginningTime) / 60 >= minutes){
+		         timer.cancel();
+		       }
+		   }
+		}, begin, timeInterval);
 	}
 	
 	public static void main(String[] args) throws IOException {
 		
 		FeedPoller poller = new FeedPoller();
-		poller.getBusPositions();
-		System.out.println("________________________");
-		System.out.println(poller.trips);
+		poller.timedOperation(11, 35, poller);
+		
+		
+		
 	}
 	
 }
