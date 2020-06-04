@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -39,11 +40,17 @@ public class FeedPoller {
 		this.tripsReader = new TripsReader();
 		//this.routesReader = new RoutesReader(); THIS PROBABLY ISNT NEEDED RIGHT NOW
 		
+		for (Map.Entry<String, Trip> entry: this.tripsReader.getTrips().entrySet()) {
+			
+			this.trips.put(entry.getKey(), new ArrayList<BusLocation>());
+		}
+		
+		/*
 		for (Trip t: this.tripsReader.getTrips()) {
 			
 			this.trips.put(t.getTrip_id(), new ArrayList<BusLocation>());
 		}
-		
+		*/
 	}
 	
 	//DO NOT CALL THIS FUNCTION MORE THAN ONCE EVERY THIRTY SECONDS
@@ -135,6 +142,30 @@ public class FeedPoller {
 		   public void run() {
 			   try {
 				poller.getBusPositions();
+				for (Map.Entry<String, List<BusLocation>> entry: poller.trips.entrySet()) {
+					String key = entry.getKey();
+					List<BusLocation> locationSet = entry.getValue();
+					
+					if (locationSet.size() > 0) {
+						
+						//String print = poller.tripsReader.getTrips().get(key).getRoute_id() + ", dir: " + poller.tripsReader.getTrips().get(key).getDirection_id()
+								// + ", headsign: " + poller.tripsReader.getTrips().get(key).getTrip_id() + ", len: " + locationSet.size();
+						
+						
+						//String print = poller.tripsReader.getTrips().get(key).getRoute_id() + " " + locationSet.size();
+						System.out.println(poller.tripsReader.getTrips().get(key) + " | #: " + locationSet.size());
+					}
+					
+					/*
+					if (locationSet.size() > 0) {
+						
+						System.out.println(locationSet.size() + " | " + key);
+						
+					}
+					*/
+				}
+				
+				/*
 				for (Trip t: poller.tripsReader.getTrips()) {
 					
 					String key = t.getTrip_id();
@@ -148,6 +179,7 @@ public class FeedPoller {
 					}
 					
 				}
+				*/
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -166,7 +198,8 @@ public class FeedPoller {
 	public static void main(String[] args) throws IOException {
 		
 		FeedPoller poller = new FeedPoller();
-		poller.timedOperation(11, 35, poller);
+		//System.out.println(poller.tripsReader.getTrips().get("113220414"));
+		poller.timedOperation(30, 35, poller);
 		
 		
 		

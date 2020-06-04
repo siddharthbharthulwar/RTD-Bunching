@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class TripsReader {
 	
@@ -17,7 +18,7 @@ public class TripsReader {
 	public List<String> shape_id = new ArrayList<String>();
 	public List<String> service_id = new ArrayList<String>();
 	public List<String> trip_id = new ArrayList<String>();
-	public List<Trip> trips = new ArrayList<Trip>();
+	public HashMap<String, Trip> trips = new HashMap<String, Trip>();
 	
 	public TripsReader() throws IOException {
 		
@@ -97,11 +98,11 @@ public class TripsReader {
 					this.trip_headsign.get(i), this.shape_id.get(i), this.service_id.get(i), 
 					this.trip_id.get(i));
 			
-			this.trips.add(t);
+			this.trips.put(this.trip_id.get(i), t);
 		}
 	}
 	
-	public List<Trip> getTrips(){
+	public HashMap<String, Trip> getTrips(){
 		
 		return this.trips;
 	}

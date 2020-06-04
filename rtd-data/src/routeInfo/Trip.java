@@ -31,7 +31,7 @@ public class Trip {
 	
 	public String toString() {
 		
-		String s = this.trip_id + " in direction " + this.direction_id + " : " + this.trip_headsign;
+		String s = this.route_id + ", " + this.direction_id + ", " + this.trip_headsign;
 		return s;
 	}
 
