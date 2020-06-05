@@ -2,7 +2,6 @@ package liveFeed;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -11,6 +10,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,14 +37,27 @@ public class FeedPoller {
 	public final int secondBuffer = 30;
 	
 	public TripsReader tripsReader;
+	
+	public CSVWriter writer;
 	//public RoutesReader routesReader;  THIS PROBABLY ISNT NEEDED RIGHT NOW 
 	
-	public HashMap<String, BusLocation> returnedBuses = new HashMap<String, BusLocation>();
+	public HashMap<String, BusLocation> polls = new HashMap<String, BusLocation>();
+	public List<String[]> responses = new ArrayList<String[]>();
 	
 	public FeedPoller() throws IOException {
 		
 		this.tripsReader = new TripsReader();
-		//this.routesReader = new RoutesReader(); THIS PROBABLY ISNT NEEDED RIGHT NOW
+		
+		LocalDateTime date = LocalDateTime.now();
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy");
+		String filename = "data/" + dtf.format(date) + ".csv";
+		File csv = new File(filename);
+		
+		FileWriter outputFile = new FileWriter(csv);
+		this.writer = new CSVWriter(outputFile);
+		
+		String[] header = {"DateTime", "Epoch", "TripID", "RouteID", "DirectionID", "Latitude", "Longitude"};
+		writer.writeNext(header);
 		
 	}
 	
@@ -57,7 +70,7 @@ public class FeedPoller {
 		long currentCallSeconds = instant.getEpochSecond();
 		
 		LocalDateTime date = LocalDateTime.now();
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss");
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy  HH-mm-ss");
 		
 		if (currentCallSeconds - previousCallSeconds >= this.secondBuffer) {
 
@@ -67,24 +80,31 @@ public class FeedPoller {
 				try {
 					GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(stream);
 					
+					int index = 0;
+					
 					for (GtfsRealtime.FeedEntity entity: feed.getEntityList()) {
+						
 
 						GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
-						
 						BusLocation location = new BusLocation();
 						location.setLatitude(vehiclePosition.getPosition().getLatitude());
 						location.setLongitude(vehiclePosition.getPosition().getLongitude());
-						location.setTimestamp(vehiclePosition.getTimestamp());						
+						location.setTimestamp(vehiclePosition.getTimestamp());
+						location.setTripID(vehiclePosition.getTrip().getTripId());
+						location.setDirectionID(Integer.toString(vehiclePosition.getTrip().getDirectionId()));
+						location.setDateTime(dtf.format(date));
 						
 						String key = vehiclePosition.getTrip().getTripId();
-						Trip currentTrip = this.tripsReader.getTrips().get(key);
 						
-						location.setDirectionID(Integer.toString(currentTrip.getDirection_id()));
-						location.setRouteID(currentTrip.getRoute_id());
-						location.setTripID(key);
-						location.setDateTime(dtf.format(date));
-												
-						this.returnedBuses.put(key, location);
+					//	location.setRouteID(this.tripsReader.getTrips().get(key).getRoute_id());
+						
+						//current issue: routes aren't lining up correctly
+						
+						if (index > 0 && key != null && !key.isEmpty()) {
+							this.polls.put(key, location);
+
+						}
+						index++;
 
 					}
 				} 
@@ -126,17 +146,6 @@ public class FeedPoller {
 	
 	public void timedOperation(long minutes, int timeInterval, FeedPoller poller) throws IOException {
 		
-		LocalDateTime date = LocalDateTime.now();
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy");
-		String filename = "data/" + dtf.format(date) + ".csv";
-		File csv = new File(filename);
-		
-		FileWriter outputFile = new FileWriter(csv);
-		CSVWriter writer = new CSVWriter(outputFile);
-		
-		String[] header = {"DateTime", "Epoch", "TripID", "RouteID", "DirectionID", "Latitude", "Longitude"};
-		writer.writeNext(header);
-				
 		timeInterval = 1000 * timeInterval;
 		Timer timer = new Timer();
 		int begin = 0;
@@ -146,25 +155,22 @@ public class FeedPoller {
 		timer.schedule(new TimerTask() {
 		   @Override
 		   public void run() {
-			   
-		   try {
+			   try {
 				poller.getBusPositions();
-				System.out.println(poller.returnedBuses.keySet());
-				for (Map.Entry<String, BusLocation> entry: poller.returnedBuses.entrySet()) {
-					BusLocation location = entry.getValue();
-						
-					String[] response = {location.getDateTime(), Long.toString(location.getTimestamp()), location.getTripID(), location.getRouteID(), location.getDirectionID(),
-							Double.toString(location.getLatitude()), Double.toString(location.getLongitude())};					
+				for (Map.Entry<String, BusLocation> entry: poller.polls.entrySet()) {
 					
-					writer.writeNext(response);
-					System.out.println("wrote response");
+					BusLocation location = entry.getValue();
+					
+					String[] response = {location.getDateTime(), Long.toString(location.getTimestamp()), location.getTripID(), location.getRouteID(), location.getDirectionID(),
+							Double.toString(location.getLatitude()), Double.toString(location.getLongitude())};	
+					
+					poller.responses.add(response);
 				}
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			   
 		       Instant instant2 = Instant.now();
 		       long endingTime = instant2.getEpochSecond();
 		       System.out.println("Time: " + (endingTime - beginningTime));
@@ -175,19 +181,26 @@ public class FeedPoller {
 		   }
 		}, begin, timeInterval);
 		
-		try {
-			writer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		/*
+		for (String[] array: responses) {
+			System.out.println(Arrays.toString(array));
+			writer.writeNext(array);
+		}*/
+		
+		
 	}
 	
 	public static void main(String[] args) throws IOException {
 		
 		FeedPoller poller = new FeedPoller();
-		poller.timedOperation(2, 31, poller);
-
+		poller.timedOperation(2, 60, poller);
+		
+		for (String[] array: poller.responses) {
+			
+			poller.writer.writeNext(array);
+		}
+		
+		poller.writer.close();
 	}
 	
 }
