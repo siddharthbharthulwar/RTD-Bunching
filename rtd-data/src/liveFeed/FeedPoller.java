@@ -7,7 +7,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +19,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.google.transit.realtime.GtfsRealtime;
+import com.opencsv.CSVWriter;
+
 import kong.unirest.Unirest;
 import routeInfo.RoutesReader;
 import routeInfo.Trip;
@@ -34,17 +39,13 @@ public class FeedPoller {
 	public TripsReader tripsReader;
 	//public RoutesReader routesReader;  THIS PROBABLY ISNT NEEDED RIGHT NOW 
 	
-	public HashMap<String, List<BusLocation>> trips = new HashMap<String, List<BusLocation>>();
+	public HashMap<String, BusLocation> polls = new HashMap<String, BusLocation>();
 	
 	public FeedPoller() throws IOException {
 		
 		this.tripsReader = new TripsReader();
-		//this.routesReader = new RoutesReader(); THIS PROBABLY ISNT NEEDED RIGHT NOW
 		
-		for (Map.Entry<String, Trip> entry: this.tripsReader.getTrips().entrySet()) {
-			
-			this.trips.put(entry.getKey(), new ArrayList<BusLocation>());
-		}
+		//this.routesReader = new RoutesReader(); THIS PROBABLY ISNT NEEDED RIGHT NOW
 		
 	}
 	
@@ -56,6 +57,9 @@ public class FeedPoller {
 		Instant instant = Instant.now();
 		long currentCallSeconds = instant.getEpochSecond();
 		
+		LocalDateTime date = LocalDateTime.now();
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy  HH-mm-ss");
+		
 		if (currentCallSeconds - previousCallSeconds >= this.secondBuffer) {
 
 			Unirest.get(url).basicAuth(this.username, this.password).thenConsume(rawResponse -> {
@@ -64,28 +68,27 @@ public class FeedPoller {
 				try {
 					GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(stream);
 					
+					int index = 0;
+					
 					for (GtfsRealtime.FeedEntity entity: feed.getEntityList()) {
+						
 
 						GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
 						BusLocation location = new BusLocation();
 						location.setLatitude(vehiclePosition.getPosition().getLatitude());
 						location.setLongitude(vehiclePosition.getPosition().getLongitude());
 						location.setTimestamp(vehiclePosition.getTimestamp());
+						location.setTripID(vehiclePosition.getTrip().getTripId());
+						location.setDirectionID(Integer.toString(vehiclePosition.getTrip().getDirectionId()));
+						location.setDateTime(dtf.format(date));
 						
 						String key = vehiclePosition.getTrip().getTripId();
 						
-						List<BusLocation> currentList = this.trips.get(key);
-						
-					    if(currentList == null) {
-					    	
-					         currentList = new ArrayList<BusLocation>();
-					         currentList.add(location);
-					         this.trips.put(key, currentList);
-					         
-					    } else {
-					    	
-					        if(!currentList.contains(location)) currentList.add(location);
-					    }
+						if (index > 0) {
+							this.polls.put(key, location);
+
+						}
+						index++;
 
 					}
 				} 
@@ -101,6 +104,7 @@ public class FeedPoller {
 		else {
 			
 			System.out.println("ERROR: WAIT " + (this.secondBuffer - (currentCallSeconds - previousCallSeconds)) +  " SECONDS BEFORE CALLING FUNCTION AGAIN");
+			System.exit(0);
 		}
 	}
 	
@@ -124,7 +128,18 @@ public class FeedPoller {
 		writer.close();
 	}
 	
-	public void timedOperation(long minutes, int timeInterval, FeedPoller poller) {
+	public void timedOperation(long minutes, int timeInterval, FeedPoller poller) throws IOException {
+		
+		LocalDateTime date = LocalDateTime.now();
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy");
+		String filename = "data/" + dtf.format(date) + ".csv";
+		File csv = new File(filename);
+		
+		FileWriter outputFile = new FileWriter(csv);
+		CSVWriter writer = new CSVWriter(outputFile);
+		
+		String[] header = {"DateTime", "Epoch", "TripID", "RouteID", "DirectionID", "Latitude", "Longitude"};
+		writer.writeNext(header);
 		
 		timeInterval = 1000 * timeInterval;
 		Timer timer = new Timer();
@@ -137,16 +152,15 @@ public class FeedPoller {
 		   public void run() {
 			   try {
 				poller.getBusPositions();
-				for (Map.Entry<String, List<BusLocation>> entry: poller.trips.entrySet()) {
-					String key = entry.getKey();
-					List<BusLocation> locationSet = entry.getValue();
+				for (Map.Entry<String, BusLocation> entry: poller.polls.entrySet()) {
 					
-					if (locationSet.size() > 0) {
-						
-						System.out.println(poller.tripsReader.getTrips().get(key) + " | #: " + locationSet.size());
-						//THIS IS WHERE SAVING FUNCTION GOES
-					}
+					BusLocation location = entry.getValue();
 					
+					String[] response = {location.getDateTime(), Long.toString(location.getTimestamp()), location.getTripID(), location.getRouteID(), location.getDirectionID(),
+							Double.toString(location.getLatitude()), Double.toString(location.getLongitude())};	
+					
+					System.out.println(Arrays.toString(response));
+					writer.writeNext(response);
 				}
 				
 			} catch (IOException e) {
@@ -162,24 +176,16 @@ public class FeedPoller {
 		       }
 		   }
 		}, begin, timeInterval);
+		
+		writer.flush();
+		writer.close();
 	}
 	
-	
-	//CURRENTLY WORKING ON INITIALIZING ALL TEXT FILES FOR DATA STORAGE
 	public static void main(String[] args) throws IOException {
 		
 		FeedPoller poller = new FeedPoller();
-		poller.timedOperation(60, 31, poller);
-		
-		/*
-		for (Map.Entry<String, List<BusLocation>> entry: poller.trips.entrySet()) {
-			
-			String key = entry.getKe
-			String filepath = "data/" + key + ".txt";
-			File file = new File(filepath);
-			file.createNewFile();
-		}
-		*/
+		poller.timedOperation(2, 31, poller);
+
 	}
 	
 }
