@@ -2,6 +2,7 @@ package liveFeed;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
@@ -28,7 +29,7 @@ public class FeedPoller {
 	public final String username = "RTDgtfsRT";
 	public final String password = "realT!m3Feed";
 	public final String url = "http://www.rtd-denver.com/google_sync/VehiclePosition.pb";
-	public final int secondBuffer = 33;
+	public final int secondBuffer = 30;
 	
 	public TripsReader tripsReader;
 	//public RoutesReader routesReader;  THIS PROBABLY ISNT NEEDED RIGHT NOW 
@@ -45,12 +46,6 @@ public class FeedPoller {
 			this.trips.put(entry.getKey(), new ArrayList<BusLocation>());
 		}
 		
-		/*
-		for (Trip t: this.tripsReader.getTrips()) {
-			
-			this.trips.put(t.getTrip_id(), new ArrayList<BusLocation>());
-		}
-		*/
 	}
 	
 	//DO NOT CALL THIS FUNCTION MORE THAN ONCE EVERY THIRTY SECONDS
@@ -61,7 +56,7 @@ public class FeedPoller {
 		Instant instant = Instant.now();
 		long currentCallSeconds = instant.getEpochSecond();
 		
-		if (currentCallSeconds - previousCallSeconds > this.secondBuffer) {
+		if (currentCallSeconds - previousCallSeconds >= this.secondBuffer) {
 
 			Unirest.get(url).basicAuth(this.username, this.password).thenConsume(rawResponse -> {
 								
@@ -70,9 +65,7 @@ public class FeedPoller {
 					GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(stream);
 					
 					for (GtfsRealtime.FeedEntity entity: feed.getEntityList()) {
-						
-						
-						
+
 						GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
 						BusLocation location = new BusLocation();
 						location.setLatitude(vehiclePosition.getPosition().getLatitude());
@@ -84,11 +77,13 @@ public class FeedPoller {
 						List<BusLocation> currentList = this.trips.get(key);
 						
 					    if(currentList == null) {
+					    	
 					         currentList = new ArrayList<BusLocation>();
 					         currentList.add(location);
 					         this.trips.put(key, currentList);
+					         
 					    } else {
-					        // add if Car is not already in list
+					    	
 					        if(!currentList.contains(location)) currentList.add(location);
 					    }
 
@@ -148,38 +143,12 @@ public class FeedPoller {
 					
 					if (locationSet.size() > 0) {
 						
-						//String print = poller.tripsReader.getTrips().get(key).getRoute_id() + ", dir: " + poller.tripsReader.getTrips().get(key).getDirection_id()
-								// + ", headsign: " + poller.tripsReader.getTrips().get(key).getTrip_id() + ", len: " + locationSet.size();
-						
-						
-						//String print = poller.tripsReader.getTrips().get(key).getRoute_id() + " " + locationSet.size();
 						System.out.println(poller.tripsReader.getTrips().get(key) + " | #: " + locationSet.size());
+						//THIS IS WHERE SAVING FUNCTION GOES
 					}
 					
-					/*
-					if (locationSet.size() > 0) {
-						
-						System.out.println(locationSet.size() + " | " + key);
-						
-					}
-					*/
 				}
 				
-				/*
-				for (Trip t: poller.tripsReader.getTrips()) {
-					
-					String key = t.getTrip_id();
-					
-					List<BusLocation> location = poller.trips.get(key);
-					
-					if (location.size() > 0) {
-						
-						System.out.println(location.size() + " | " + key);
-						
-					}
-					
-				}
-				*/
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -195,14 +164,22 @@ public class FeedPoller {
 		}, begin, timeInterval);
 	}
 	
+	
+	//CURRENTLY WORKING ON INITIALIZING ALL TEXT FILES FOR DATA STORAGE
 	public static void main(String[] args) throws IOException {
 		
 		FeedPoller poller = new FeedPoller();
-		//System.out.println(poller.tripsReader.getTrips().get("113220414"));
-		poller.timedOperation(30, 35, poller);
+		poller.timedOperation(60, 31, poller);
 		
-		
-		
+		/*
+		for (Map.Entry<String, List<BusLocation>> entry: poller.trips.entrySet()) {
+			
+			String key = entry.getKe
+			String filepath = "data/" + key + ".txt";
+			File file = new File(filepath);
+			file.createNewFile();
+		}
+		*/
 	}
 	
 }
