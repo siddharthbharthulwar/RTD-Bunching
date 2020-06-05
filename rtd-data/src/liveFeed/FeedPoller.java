@@ -2,11 +2,8 @@ package liveFeed;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.BufferedReader;
-<<<<<<< HEAD
 import java.io.BufferedWriter;
 import java.io.File;
-=======
->>>>>>> parent of 8a10815... add day class (might remove)
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
@@ -37,7 +34,7 @@ public class FeedPoller {
 	public final String username = "RTDgtfsRT";
 	public final String password = "realT!m3Feed";
 	public final String url = "http://www.rtd-denver.com/google_sync/VehiclePosition.pb";
-	public final int secondBuffer = 33;
+	public final int secondBuffer = 30;
 	
 	public TripsReader tripsReader;
 	//public RoutesReader routesReader;  THIS PROBABLY ISNT NEEDED RIGHT NOW 
@@ -49,20 +46,6 @@ public class FeedPoller {
 		this.tripsReader = new TripsReader();
 		//this.routesReader = new RoutesReader(); THIS PROBABLY ISNT NEEDED RIGHT NOW
 		
-<<<<<<< HEAD
-=======
-		for (Map.Entry<String, Trip> entry: this.tripsReader.getTrips().entrySet()) {
-			
-			this.trips.put(entry.getKey(), new ArrayList<BusLocation>());
-		}
-		
-		/*
-		for (Trip t: this.tripsReader.getTrips()) {
-			
-			this.trips.put(t.getTrip_id(), new ArrayList<BusLocation>());
-		}
-		*/
->>>>>>> parent of 8a10815... add day class (might remove)
 	}
 	
 	//DO NOT CALL THIS FUNCTION MORE THAN ONCE EVERY THIRTY SECONDS
@@ -73,14 +56,10 @@ public class FeedPoller {
 		Instant instant = Instant.now();
 		long currentCallSeconds = instant.getEpochSecond();
 		
-<<<<<<< HEAD
 		LocalDateTime date = LocalDateTime.now();
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH-mm-ss");
 		
 		if (currentCallSeconds - previousCallSeconds >= this.secondBuffer) {
-=======
-		if (currentCallSeconds - previousCallSeconds > this.secondBuffer) {
->>>>>>> parent of 8a10815... add day class (might remove)
 
 			Unirest.get(url).basicAuth(this.username, this.password).thenConsume(rawResponse -> {
 								
@@ -89,9 +68,7 @@ public class FeedPoller {
 					GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(stream);
 					
 					for (GtfsRealtime.FeedEntity entity: feed.getEntityList()) {
-						
-						
-						
+
 						GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
 						
 						BusLocation location = new BusLocation();
@@ -102,25 +79,12 @@ public class FeedPoller {
 						String key = vehiclePosition.getTrip().getTripId();
 						Trip currentTrip = this.tripsReader.getTrips().get(key);
 						
-<<<<<<< HEAD
 						location.setDirectionID(Integer.toString(currentTrip.getDirection_id()));
 						location.setRouteID(currentTrip.getRoute_id());
 						location.setTripID(key);
 						location.setDateTime(dtf.format(date));
 												
 						this.returnedBuses.put(key, location);
-=======
-						List<BusLocation> currentList = this.trips.get(key);
-						
-					    if(currentList == null) {
-					         currentList = new ArrayList<BusLocation>();
-					         currentList.add(location);
-					         this.trips.put(key, currentList);
-					    } else {
-					        // add if Car is not already in list
-					        if(!currentList.contains(location)) currentList.add(location);
-					    }
->>>>>>> parent of 8a10815... add day class (might remove)
 
 					}
 				} 
@@ -189,46 +153,13 @@ public class FeedPoller {
 				for (Map.Entry<String, BusLocation> entry: poller.returnedBuses.entrySet()) {
 					BusLocation location = entry.getValue();
 						
-<<<<<<< HEAD
 					String[] response = {location.getDateTime(), Long.toString(location.getTimestamp()), location.getTripID(), location.getRouteID(), location.getDirectionID(),
 							Double.toString(location.getLatitude()), Double.toString(location.getLongitude())};					
 					
 					writer.writeNext(response);
 					System.out.println("wrote response");
-=======
-						//String print = poller.tripsReader.getTrips().get(key).getRoute_id() + ", dir: " + poller.tripsReader.getTrips().get(key).getDirection_id()
-								// + ", headsign: " + poller.tripsReader.getTrips().get(key).getTrip_id() + ", len: " + locationSet.size();
-						
-						
-						//String print = poller.tripsReader.getTrips().get(key).getRoute_id() + " " + locationSet.size();
-						System.out.println(poller.tripsReader.getTrips().get(key) + " | #: " + locationSet.size());
-					}
-					
-					/*
-					if (locationSet.size() > 0) {
-						
-						System.out.println(locationSet.size() + " | " + key);
-						
-					}
-					*/
->>>>>>> parent of 8a10815... add day class (might remove)
 				}
 				
-				/*
-				for (Trip t: poller.tripsReader.getTrips()) {
-					
-					String key = t.getTrip_id();
-					
-					List<BusLocation> location = poller.trips.get(key);
-					
-					if (location.size() > 0) {
-						
-						System.out.println(location.size() + " | " + key);
-						
-					}
-					
-				}
-				*/
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -255,16 +186,8 @@ public class FeedPoller {
 	public static void main(String[] args) throws IOException {
 		
 		FeedPoller poller = new FeedPoller();
-<<<<<<< HEAD
 		poller.timedOperation(2, 31, poller);
 
-=======
-		//System.out.println(poller.tripsReader.getTrips().get("113220414"));
-		poller.timedOperation(30, 35, poller);
-		
-		
-		
->>>>>>> parent of 8a10815... add day class (might remove)
 	}
 	
 }
