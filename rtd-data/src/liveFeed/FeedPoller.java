@@ -37,15 +37,27 @@ public class FeedPoller {
 	public final int secondBuffer = 30;
 	
 	public TripsReader tripsReader;
+	
+	public CSVWriter writer;
 	//public RoutesReader routesReader;  THIS PROBABLY ISNT NEEDED RIGHT NOW 
 	
 	public HashMap<String, BusLocation> polls = new HashMap<String, BusLocation>();
+	public List<String[]> responses = new ArrayList<String[]>();
 	
 	public FeedPoller() throws IOException {
 		
 		this.tripsReader = new TripsReader();
 		
-		//this.routesReader = new RoutesReader(); THIS PROBABLY ISNT NEEDED RIGHT NOW
+		LocalDateTime date = LocalDateTime.now();
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy");
+		String filename = "data/" + dtf.format(date) + ".csv";
+		File csv = new File(filename);
+		
+		FileWriter outputFile = new FileWriter(csv);
+		this.writer = new CSVWriter(outputFile);
+		
+		String[] header = {"DateTime", "Epoch", "TripID", "RouteID", "DirectionID", "Latitude", "Longitude"};
+		writer.writeNext(header);
 		
 	}
 	
@@ -84,7 +96,11 @@ public class FeedPoller {
 						
 						String key = vehiclePosition.getTrip().getTripId();
 						
-						if (index > 0) {
+					//	location.setRouteID(this.tripsReader.getTrips().get(key).getRoute_id());
+						
+						//current issue: routes aren't lining up correctly
+						
+						if (index > 0 && key != null && !key.isEmpty()) {
 							this.polls.put(key, location);
 
 						}
@@ -130,17 +146,6 @@ public class FeedPoller {
 	
 	public void timedOperation(long minutes, int timeInterval, FeedPoller poller) throws IOException {
 		
-		LocalDateTime date = LocalDateTime.now();
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy");
-		String filename = "data/" + dtf.format(date) + ".csv";
-		File csv = new File(filename);
-		
-		FileWriter outputFile = new FileWriter(csv);
-		CSVWriter writer = new CSVWriter(outputFile);
-		
-		String[] header = {"DateTime", "Epoch", "TripID", "RouteID", "DirectionID", "Latitude", "Longitude"};
-		writer.writeNext(header);
-		
 		timeInterval = 1000 * timeInterval;
 		Timer timer = new Timer();
 		int begin = 0;
@@ -159,8 +164,7 @@ public class FeedPoller {
 					String[] response = {location.getDateTime(), Long.toString(location.getTimestamp()), location.getTripID(), location.getRouteID(), location.getDirectionID(),
 							Double.toString(location.getLatitude()), Double.toString(location.getLongitude())};	
 					
-					System.out.println(Arrays.toString(response));
-					writer.writeNext(response);
+					poller.responses.add(response);
 				}
 				
 			} catch (IOException e) {
@@ -177,15 +181,26 @@ public class FeedPoller {
 		   }
 		}, begin, timeInterval);
 		
-		writer.flush();
-		writer.close();
+		/*
+		for (String[] array: responses) {
+			System.out.println(Arrays.toString(array));
+			writer.writeNext(array);
+		}*/
+		
+		
 	}
 	
 	public static void main(String[] args) throws IOException {
 		
 		FeedPoller poller = new FeedPoller();
-		poller.timedOperation(2, 31, poller);
-
+		poller.timedOperation(2, 60, poller);
+		
+		for (String[] array: poller.responses) {
+			
+			poller.writer.writeNext(array);
+		}
+		
+		poller.writer.close();
 	}
 	
 }
