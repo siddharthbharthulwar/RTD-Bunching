@@ -11,7 +11,7 @@ def findunique(list1):
     unique_list = (list(list_set)) 
     return unique_list
 
-df = pd.read_csv("rtd-data/data/06-05-20.csv")
+df = pd.read_csv("rtd-data/data/06-06-20.csv")
 unique = findunique(df['TripID'].tolist())
 
 ind = 0
