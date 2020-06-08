@@ -70,7 +70,7 @@ public class FeedPoller extends Thread {
 			long currentCallSeconds = instant.getEpochSecond();
 			
 			LocalDateTime date = LocalDateTime.now();
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy  HH-mm-ss");
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HHmm");
 			
 			if (currentCallSeconds - previousCallSeconds >= this.secondBuffer) {
 
