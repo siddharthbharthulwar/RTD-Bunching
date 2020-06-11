@@ -4,14 +4,16 @@ import matplotlib.pyplot as plt
 from formulas import haversine, midpoint
 import itertools
 import numpy.ma as ma
+import math
 
 class BusPosition:
 
-    def __init__(self, latitude, longitude, routeid):
+    def __init__(self, latitude, longitude, routeid, directionid):
         
         self.latitude = latitude
         self.longitude = longitude
         self.routeid = routeid
+        self.directionid = directionid
 
 def checklist(busList, threshold):
 
@@ -48,7 +50,7 @@ def generateheatmap(xdata, ydata, bins, maskedBool):
 def checkcsv(csvpath):
 
     df = pd.read_csv(csvpath)
-    a = df.groupby('DateTime')[['TripID', 'Latitude', 'Longitude', 'RouteID']].apply(lambda g: g.values.tolist()).to_dict()
+    a = df.groupby('DateTime')[['TripID', 'Latitude', 'Longitude', 'RouteID', 'DirectionID']].apply(lambda g: g.values.tolist()).to_dict()
 
     globlats = []
     globlons = []
@@ -59,28 +61,42 @@ def checkcsv(csvpath):
 
         for i in a[key]:
 
-            buses[i[3]] = []
+            if not (math.isnan(i[0])):
+
+                print(i)
+
+                keydir = i[4]
+                keyroute = i[3]
+
+                keystr = str(keyroute) + "" + str(int(keydir))
+                buses[keystr] = []
 
         for bus in a[key]:
 
-            latitude = bus[1]
-            longitude = bus[2]
-            routeid = bus[3]
+            if not (math.isnan(i[0])):
+                latitude = bus[1]
+                longitude = bus[2]
+                routeid = bus[3]
+                directionid = bus[4]
 
-            buses[routeid].append(BusPosition(latitude, longitude, routeid))
+                keystr = str(routeid) + "" +  str(int(directionid))
+
+                buses[keystr].append(BusPosition(latitude, longitude, routeid, directionid))
 
         for routekey in buses:
+
+            if not (math.isnan(i[0])):
             
-            ret = checklist(buses[routekey], 1000)
-            lats = []
-            lons = []
+                ret = checklist(buses[routekey], 1000)
+                lats = []
+                lons = []
 
-            for b in ret:
+                for b in ret:
 
-                lats.append(b[0])
-                lons.append(b[1])
-                globlats.append(b[0])
-                globlons.append(b[1])
+                    lats.append(b[0])
+                    lons.append(b[1])
+                    globlats.append(b[0])
+                    globlons.append(b[1])
 
         buses = None
 
