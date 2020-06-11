@@ -1,7 +1,7 @@
 import math
 
-def airportDistance(latitude1, longitude1, latitude2, longitude2):
-    radius = 6371
+def haversine(latitude1, longitude1, latitude2, longitude2):
+    radius = 20924640
     lat1 = float(latitude1)
     lon1 = float(longitude1)
     lat2 = float(latitude2)
@@ -12,3 +12,12 @@ def airportDistance(latitude1, longitude1, latitude2, longitude2):
     a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
     distance = radius * c
+
+    return distance
+
+def midpoint(latitude1, longitude1, latitude2, longitude2):
+
+    midlat = (latitude1 + latitude2) / 2
+    midlon = (longitude1 + longitude2) / 2
+
+    return (midlat, midlon)
