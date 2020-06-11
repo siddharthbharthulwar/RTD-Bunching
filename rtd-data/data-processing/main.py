@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from formulas import haversine, midpoint
 import itertools
+import numpy.ma as ma
 
 class BusPosition:
 
@@ -26,11 +27,31 @@ def checklist(busList, threshold):
 
     return bunching_incidences
 
+def generateheatmap(xdata, ydata, bins, maskedBool):
+
+    heatmap, xedges, yedges = np.histogram2d(xdata, ydata, bins = bins)
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+
+    if (maskedBool):
+
+        masked = ma.masked_values(heatmap.T, 0)
+
+        plt.imshow(masked, extent = extent, origin = 'lower')
+        plt.show()
+    else:
+
+        plt.imshow(heatmap.T, extent = extent, origin = 'lower')
+        plt.show()
+
+
 
 def checkcsv(csvpath):
 
     df = pd.read_csv(csvpath)
     a = df.groupby('DateTime')[['TripID', 'Latitude', 'Longitude', 'RouteID']].apply(lambda g: g.values.tolist()).to_dict()
+
+    globlats = []
+    globlons = []
 
     for key in a:
 
@@ -58,19 +79,12 @@ def checkcsv(csvpath):
 
                 lats.append(b[0])
                 lons.append(b[1])
-
-
-            plt.scatter(lons, lats, s = 110)
-            for c in buses[routekey]:
-                
-                plt.scatter(c.longitude, c.latitude)
-
-            plt.title(str(routekey))
-            plt.show()
-
-            #print(checklist(buses[routekey], 1000))
+                globlats.append(b[0])
+                globlons.append(b[1])
 
         buses = None
+
+    generateheatmap(globlons, globlats, 75, False)
 
 checkcsv("rtd-data/data/06-10-20.csv")
 
