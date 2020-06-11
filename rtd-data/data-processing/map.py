@@ -1,15 +1,19 @@
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt 
+import cartopy.crs as ccrs
+from matplotlib import animation
+from cartopy.io.img_tiles import Stamen, GoogleTiles
 
-df = pd.read_csv("rtd-data/data/06-08-20.csv")
+
+
+df = pd.read_csv("rtd-data/data/06-09-20.csv")
 
 gf = df.sort_values(['DateTime', 'TripID'])
 
 uniquelist = list(set(gf['DateTime'].tolist()))
 
 
-index = 0
 for un in uniquelist:
 
     ls = gf.loc[gf['DateTime'] == un]
@@ -21,7 +25,9 @@ for un in uniquelist:
 
         lats.append(row['Latitude'])
         lons.append(row['Longitude'])
+        print(index)
     
+    '''
     fig = plt.figure()
     ax = plt.subplot(111)
     ax.scatter(lons, lats)
@@ -29,9 +35,10 @@ for un in uniquelist:
 
     filename = "rtd-data/data-processing/images/" + str(index) + ".png"
     fig.savefig(filename, dpi = 96)
-    print(index)
-    index +=1
-'''
+    
+    '''
+    print(len(lats))
+
+
 hist = df.hist(column='DateTime', bins = 500)
 plt.show()
-'''

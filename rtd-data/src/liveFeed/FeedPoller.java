@@ -14,11 +14,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.transit.realtime.GtfsRealtime;
 import com.opencsv.CSVWriter;
 
 import kong.unirest.Unirest;
+import routeInfo.Trip;
 import routeInfo.TripsReader;
 
 public class FeedPoller extends Thread {
@@ -61,6 +63,13 @@ public class FeedPoller extends Thread {
 			
 		}
 		
+		public static String getDateTime() {
+			
+			LocalDateTime date = LocalDateTime.now();
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HHmm");
+			return dtf.format(date);
+		}
+		
 		//DO NOT CALL THIS FUNCTION MORE THAN ONCE EVERY THIRTY SECONDS
 		
 		private void getBusPositions() throws IOException
@@ -68,10 +77,7 @@ public class FeedPoller extends Thread {
 			long previousCallSeconds = this.read();
 			Instant instant = Instant.now();
 			long currentCallSeconds = instant.getEpochSecond();
-			
-			LocalDateTime date = LocalDateTime.now();
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HHmm");
-			
+
 			if (currentCallSeconds - previousCallSeconds >= this.secondBuffer) {
 
 				Unirest.get(url).basicAuth(this.username, this.password).thenConsume(rawResponse -> {
@@ -92,21 +98,34 @@ public class FeedPoller extends Thread {
 							location.setTimestamp(vehiclePosition.getTimestamp());
 							location.setTripID(vehiclePosition.getTrip().getTripId());
 							location.setDirectionID(Integer.toString(vehiclePosition.getTrip().getDirectionId()));
-							location.setDateTime(dtf.format(date));
+							location.setDateTime(getDateTime());
 							
 							String key = vehiclePosition.getTrip().getTripId();
 							
-						//	location.setRouteID(this.tripsReader.getTrips().get(key).getRoute_id());
-							
-							//current issue: routes aren't lining up correctly
 							
 							if (index > 0 && key != null && !key.isEmpty()) {
+								location.setRouteID(this.tripsReader.getTrips().get(key).getRoute_id());
 								this.polls.put(key, location);
 
 							}
 							index++;
 
 						}
+						/*
+						for (GtfsRealtime.FeedEntity entity: feed.getEntityList()) {
+							
+							GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
+							String key = vehiclePosition.getTrip().getTripId();
+						
+							
+							System.out.println("Getting Key: " + key);
+							System.out.println("Key type: " + key.getClass());
+							System.out.println(key.length());
+							//System.out.println(this.tripsReader.getTrips().get(key).getRoute_id());
+							
+						}
+						*/
+
 					} 
 
 					catch (IOException e) {
@@ -184,8 +203,7 @@ public class FeedPoller extends Thread {
 	
     public static void main(String[] args) throws IOException {
 		
-		FeedPoller poller = new FeedPoller(120, 60);
-		
+		FeedPoller poller = new FeedPoller(60, 60);		
 		poller.start();
 	}
 

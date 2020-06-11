@@ -2,35 +2,24 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
 
+df = pd.read_csv("rtd-data/data/06-10-20.csv")
 
-def findunique(list1): 
-      
-    # insert the list to the set 
-    list_set = set(list1) 
-    # convert the set to the list 
-    unique_list = (list(list_set)) 
-    return unique_list
+a = df.groupby('DateTime')[['TripID', 'Latitude', 'Longitude', 'RouteID']].apply(lambda g: g.values.tolist()).to_dict()
 
-df = pd.read_csv("rtd-data/data/06-06-20.csv")
-unique = findunique(df['TripID'].tolist())
+for key in a:
 
-ind = 0
-
-for num in unique: 
-    pr = str(ind) + " / " + str(len(unique))
-    print(pr)
     lats = []
     lons = []
+    routes = []
 
-    for index, row in df.iterrows():
+    for bus in a[key]:
 
-        if (row['TripID'] == num):
+        lats.append(bus[1])
+        lons.append(bus[2])
+        routes.append(bus[3])
 
-            lats.append(row['Latitude'])
-            lons.append(row['Longitude'])
+    plt.scatter(lons, lats)
 
-    plt.scatter(lats, lons)
-    ind += 1
-
-plt.show()
-
+    title = str(key) + " w/ " + str(len(lons)) + " buses"
+    plt.title(title)
+    plt.show()
