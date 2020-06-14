@@ -6,6 +6,23 @@ import itertools
 import numpy.ma as ma
 import math
 
+class Route:
+
+    def __init__(self, routekey):
+
+        name = routekey[:-1]
+        direction = routekey[-1]
+
+        self.name = name
+        self.direction = direction
+
+        self.bunchinginstances = []
+
+    def addinstance(self, instance):
+
+        self.bunchinginstances.append(instance)
+
+
 class BusPosition:
 
     def __init__(self, latitude, longitude, routeid, directionid):
@@ -15,7 +32,20 @@ class BusPosition:
         self.routeid = routeid
         self.directionid = directionid
 
-def checklist(busList, threshold):
+class BunchingInstance:
+
+    def __init__(self, routekey, latitude, longitude, timestamp):
+
+        routename = routekey[:-1]
+        direction = routekey[-1]
+
+        self.name = routename
+        self.direction = direction
+        self.latitude = latitude
+        self.longitude = longitude
+        self.timestamp = timestamp
+
+def checklist(busList, threshold, routekey, timestamp):
 
     bunching_incidences = []
 
@@ -25,7 +55,10 @@ def checklist(busList, threshold):
 
         if (result < threshold):
 
-            bunching_incidences.append(midpoint(a.latitude, a.longitude, b.latitude, b.longitude))\
+            location = midpoint(a.latitude, a.longitude, b.latitude, b.longitude)
+
+            bi = BunchingInstance(routekey, location[0], location[1], timestamp)
+            bunching_incidences.append(bi)
 
     return bunching_incidences
 
@@ -45,8 +78,6 @@ def generateheatmap(xdata, ydata, bins, maskedBool):
         plt.imshow(heatmap.T, extent = extent, origin = 'lower')
         plt.show()
 
-
-
 def checkcsv(csvpath):
 
     df = pd.read_csv(csvpath)
@@ -56,7 +87,7 @@ def checkcsv(csvpath):
     globlons = []
 
     for key in a:
-        print(key)
+        
         buses = {}
 
         for i in a[key]:
@@ -85,22 +116,22 @@ def checkcsv(csvpath):
 
             if not (math.isnan(i[0])):
             
-                ret = checklist(buses[routekey], 1000)
+                ret = checklist(buses[routekey], 1000, routekey, a)
                 lats = []
                 lons = []
 
                 for b in ret:
 
-                    lats.append(b[0])
-                    lons.append(b[1])
-                    globlats.append(b[0])
-                    globlons.append(b[1])
+                    lats.append(b.latitude)
+                    lons.append(b.longitude)
+                    globlats.append(b.latitude)
+                    globlons.append(b.longitude)
 
         buses = None
 
     generateheatmap(globlons, globlats, 75, False)
 
-checkcsv("rtd-data/data/06-11-20.csv")
+checkcsv("rtd-data/data/06-13-20.csv")
 
 
 
