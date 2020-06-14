@@ -41,7 +41,6 @@ public class FeedPoller extends Thread {
 		//public RoutesReader routesReader;  THIS PROBABLY ISNT NEEDED RIGHT NOW 
 		
 		public HashMap<String, BusLocation> polls = new HashMap<String, BusLocation>();
-		public List<String[]> responses = new ArrayList<String[]>();
 		
 		public FeedPoller(int iterations, int seconds) throws IOException {
 			
@@ -63,7 +62,7 @@ public class FeedPoller extends Thread {
 			
 		}
 		
-		public static String getDateTime() {
+		public static String pollDateTime() {
 			
 			LocalDateTime date = LocalDateTime.now();
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HHmm");
@@ -74,6 +73,8 @@ public class FeedPoller extends Thread {
 		
 		private void getBusPositions() throws IOException
 		{
+			this.polls.clear();
+			
 			long previousCallSeconds = this.read();
 			Instant instant = Instant.now();
 			long currentCallSeconds = instant.getEpochSecond();
@@ -98,8 +99,8 @@ public class FeedPoller extends Thread {
 							location.setTimestamp(vehiclePosition.getTimestamp());
 							location.setTripID(vehiclePosition.getTrip().getTripId());
 							location.setDirectionID(Integer.toString(vehiclePosition.getTrip().getDirectionId()));
-							location.setDateTime(getDateTime());
-							
+							location.setDateTime(pollDateTime());
+														
 							String key = vehiclePosition.getTrip().getTripId();
 							
 							
@@ -111,20 +112,7 @@ public class FeedPoller extends Thread {
 							index++;
 
 						}
-						/*
-						for (GtfsRealtime.FeedEntity entity: feed.getEntityList()) {
-							
-							GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
-							String key = vehiclePosition.getTrip().getTripId();
-						
-							
-							System.out.println("Getting Key: " + key);
-							System.out.println("Key type: " + key.getClass());
-							System.out.println(key.length());
-							//System.out.println(this.tripsReader.getTrips().get(key).getRoute_id());
-							
-						}
-						*/
+
 
 					} 
 
@@ -203,7 +191,7 @@ public class FeedPoller extends Thread {
 	
     public static void main(String[] args) throws IOException {
 		
-		FeedPoller poller = new FeedPoller(540, 60);		
+		FeedPoller poller = new FeedPoller(30, 60);		
 		poller.start();
 	}
 

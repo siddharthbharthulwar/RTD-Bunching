@@ -56,14 +56,12 @@ def checkcsv(csvpath):
     globlons = []
 
     for key in a:
-
+        print(key)
         buses = {}
 
         for i in a[key]:
 
             if not (math.isnan(i[0])):
-
-                print(i)
 
                 keydir = i[4]
                 keyroute = i[3]
@@ -102,7 +100,7 @@ def checkcsv(csvpath):
 
     generateheatmap(globlons, globlats, 75, False)
 
-checkcsv("rtd-data/data/06-10-20.csv")
+checkcsv("rtd-data/data/06-11-20.csv")
 
 
 

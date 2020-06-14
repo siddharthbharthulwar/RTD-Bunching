@@ -44,7 +44,7 @@ public class BusLocation {
 
 	public String toString() {
 		
-		String s = "(" + this.latitude + ", " + this.longitude + ") | " + this.timestamp;
+		String s = "(" + this.latitude + ", " + this.longitude + ") | " + this.dateTime;
 		return s;
 	}
 
