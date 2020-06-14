@@ -7,7 +7,7 @@ from cartopy.io.img_tiles import Stamen, GoogleTiles
 
 
 
-df = pd.read_csv("rtd-data/data/06-09-20.csv")
+df = pd.read_csv("rtd-data/data/06-13-20.csv")
 
 gf = df.sort_values(['DateTime', 'TripID'])
 

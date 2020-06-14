@@ -5,6 +5,7 @@ from formulas import haversine, midpoint
 import itertools
 import numpy.ma as ma
 import math
+import cv2 as cv
 
 class Route:
 
@@ -64,6 +65,13 @@ def checklist(busList, threshold, routekey, timestamp):
 
 def generateheatmap(xdata, ydata, bins, maskedBool):
 
+    '''
+    -105.2888, -104.6613
+    39.5401, 40.0476
+    '''
+
+    img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
+
     heatmap, xedges, yedges = np.histogram2d(xdata, ydata, bins = bins)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
@@ -71,6 +79,7 @@ def generateheatmap(xdata, ydata, bins, maskedBool):
 
         masked = ma.masked_values(heatmap.T, 0)
 
+        plt.imshow(img[:,:,::-1], extent = [-105.2888, -104.6613, 39.5401, 40.0476])
         plt.imshow(masked, extent = extent, origin = 'lower')
         plt.show()
     else:
@@ -89,6 +98,7 @@ def checkcsv(csvpath):
     for key in a:
         
         buses = {}
+        print(key)
 
         for i in a[key]:
 
@@ -116,7 +126,7 @@ def checkcsv(csvpath):
 
             if not (math.isnan(i[0])):
             
-                ret = checklist(buses[routekey], 1000, routekey, a)
+                ret = checklist(buses[routekey], 1000, routekey, key)
                 lats = []
                 lons = []
 
@@ -129,9 +139,9 @@ def checkcsv(csvpath):
 
         buses = None
 
-    generateheatmap(globlons, globlats, 75, False)
+    generateheatmap(globlons, globlats, 200, True)
 
-checkcsv("rtd-data/data/06-13-20.csv")
+checkcsv("rtd-data/data/06-11-20.csv")
 
 
 
