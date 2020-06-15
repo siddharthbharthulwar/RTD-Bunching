@@ -2,3 +2,4 @@
 rtd-data/res/lastupdate.txt
 *.csv
 rtd-data/.classpath
+.vscode/settings.json
