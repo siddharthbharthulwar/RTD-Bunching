@@ -5,6 +5,7 @@ from formulas import haversine, midpoint
 import itertools
 import numpy.ma as ma
 import math
+from scipy.ndimage.filters import gaussian_filter
 import cv2 as cv
 
 class Route:
@@ -63,34 +64,33 @@ def checklist(busList, threshold, routekey, timestamp):
 
     return bunching_incidences
 
-def generateheatmap(xdata, ydata, bins, maskedBool):
-
-    '''
-    -105.2888, -104.6613
-    39.5401, 40.0476
-    '''
+def generateheatmap(xdata, ydata, bins, maskedBool, sigma, alpha):
 
     img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
 
     heatmap, xedges, yedges = np.histogram2d(xdata, ydata, bins = bins)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
+    blurred = gaussian_filter(heatmap.T, sigma = sigma)
+
     if (maskedBool):
 
-        masked = ma.masked_values(heatmap.T, 0)
+        masked = ma.masked_less(blurred, 15)
 
         plt.imshow(img[:,:,::-1], extent = [-105.2888, -104.6613, 39.5401, 40.0476])
-        plt.imshow(masked, extent = extent, origin = 'lower')
+        plt.imshow(masked, extent = extent, origin = 'lower', alpha = 0.4)
         plt.show()
     else:
 
-        plt.imshow(heatmap.T, extent = extent, origin = 'lower')
+        plt.imshow(blurred, extent = extent, origin = 'lower')
         plt.show()
 
 def checkcsv(csvpath):
 
     df = pd.read_csv(csvpath)
     a = df.groupby('DateTime')[['TripID', 'Latitude', 'Longitude', 'RouteID', 'DirectionID']].apply(lambda g: g.values.tolist()).to_dict()
+
+    bunchingFrame = pd.DataFrame(columns =['Time', 'Latitude', 'Longitude', 'Route', 'DirectionID'])
 
     globlats = []
     globlons = []
@@ -136,12 +136,21 @@ def checkcsv(csvpath):
                     lons.append(b.longitude)
                     globlats.append(b.latitude)
                     globlons.append(b.longitude)
+                    
+                    print(routekey)
+                    '''
+                    newRow = pd.DataFrame([key, b.latitude, b.longitude, routekey[:-1], routekey[-1]], columns = ['Time', 'Latitude', 'Longitude', 'Route', 'DirectionID'])
+                    bunchingFrame.append(newRow)
+                    '''
 
         buses = None
 
-    generateheatmap(globlons, globlats, 200, True)
 
-checkcsv("rtd-data/data/06-11-20.csv")
+    bunchingFrame.to_csv('bunching.csv')
+    generateheatmap(globlons, globlats, 200, True, 3, 0.5)
+
+
+checkcsv("rtd-data/data/06-08-20.csv")
 
 
 

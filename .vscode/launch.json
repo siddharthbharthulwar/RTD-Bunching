@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "CodeLens (Launch) - FeedPoller",
+            "request": "launch",
+            "mainClass": "liveFeed.FeedPoller",
+            "projectName": "rtd-data"
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
