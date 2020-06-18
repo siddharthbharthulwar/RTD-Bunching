@@ -53,7 +53,8 @@ class DataProcessor:
         
         self.csv = csv
         self.checkcsv()
-        
+        self.saveBunchingInstances()
+        #self.checkcsv()
     
     def checklist(self, busList, threshold, routekey, timestamp):
 
@@ -91,6 +92,26 @@ class DataProcessor:
 
             plt.imshow(heatmap.T, extent = extent, origin = 'lower')
             plt.show()
+
+    def saveBunchingInstances(self):
+
+        dateStr = self.csv[14: 22]
+        pathStr = "rtd-data/data-processing/data/" + dateStr + ".csv"
+
+        with open(pathStr, 'w') as csvfile:
+
+            filewriter = csv.writer(csvfile, delimiter = ',', quotechar = '|', quoting = csv.QUOTE_MINIMAL)
+            filewriter.writerow(['Timestamp', 'RouteName', 'Direction', 'Latitude', 'Longitude'])
+            index = 0
+            for bi in self.bunchingInstances:
+
+                ls = [str(bi.timestamp), str(bi.name), str(bi.direction), str(bi.latitude), str(bi.longitude)]
+                filewriter.writerow(ls)
+                print(index)
+                index+=1
+
+
+
 
     def checkcsv(self):
 
