@@ -191,7 +191,7 @@ public class FeedPoller extends Thread {
 	
     public static void main(String[] args) throws IOException {
 		
-		FeedPoller poller = new FeedPoller(540, 60);		
+		FeedPoller poller = new FeedPoller(720, 60);		
 		poller.start();
 	}
 
