@@ -1,5 +1,6 @@
 package liveFeed;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -30,17 +31,14 @@ public class ScheduledExecutor {
     private volatile Runnable pendingTask = null;
     
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+    	
+    	FeedPoller poller = new FeedPoller(840, 60);
     	
     	new ScheduledExecutor().scheduleRegularly(() -> {
+    		
+    		poller.start();
 
-			LocalDateTime date = LocalDateTime.now();
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy  hh-mm-ss");
-			
-			String dt = dtf.format(date);
-			
-			System.out.println(dt);
-
-    	}, LocalDateTime.now().truncatedTo(ChronoUnit.DAYS).withHour(14), thisTime -> thisTime.plusDays(1));
+    	}, LocalDateTime.now().truncatedTo(ChronoUnit.DAYS).withHour(6), thisTime -> thisTime.plusDays(1));
     }
 }
