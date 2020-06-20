@@ -30,14 +30,20 @@ public class ScheduledExecutor {
 
     private volatile Runnable pendingTask = null;
     
-    
+     
     public static void main(String[] args) throws IOException {
     	
-    	FeedPoller poller = new FeedPoller(840, 60);
-    	
+  
     	new ScheduledExecutor().scheduleRegularly(() -> {
     		
-    		poller.start();
+        	FeedPoller poller;
+			try {
+				poller = new FeedPoller(840, 60);
+	    		poller.start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
     	}, LocalDateTime.now().truncatedTo(ChronoUnit.DAYS).withHour(6), thisTime -> thisTime.plusDays(1));
     }
