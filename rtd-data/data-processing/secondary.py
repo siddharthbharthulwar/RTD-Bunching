@@ -3,10 +3,14 @@ import matplotlib.pyplot as plt
 
 class BunchingReader:
 
-    def __init__(self):
+    def __init__(self, datestr):
+
+        self.datestr = datestr
+
+        path = "rtd-data/data-processing/data/" + datestr + ".csv"
         
-        df = pd.read_csv("rtd-data\data-processing\data\06-19-20.csv")
+        self.df = pd.read_csv(path)
 
-        print(df)
+    
 
-b = BunchingReader()
+b = BunchingReader("06-19-20")

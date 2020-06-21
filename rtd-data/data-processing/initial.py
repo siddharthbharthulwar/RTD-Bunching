@@ -98,21 +98,14 @@ class DataProcessor:
         dateStr = self.csv[14: 22]
         pathStr = "rtd-data/data-processing/data/" + dateStr + ".csv"
 
-        with open(pathStr, 'w') as csvfile:
+        with open(pathStr, 'w', newline='') as csvfile:
 
             filewriter = csv.writer(csvfile, delimiter = ',', quotechar = '|', quoting = csv.QUOTE_MINIMAL)
             filewriter.writerow(['Timestamp', 'RouteName', 'Direction', 'Latitude', 'Longitude'])
-            index = 0
             for bi in self.bunchingInstances:
 
                 ls = [str(bi.timestamp), str(bi.name), str(bi.direction), str(bi.latitude), str(bi.longitude)]
                 filewriter.writerow(ls)
-                print(index)
-                index+=1
-                print(index)
-
-
-
 
     def checkcsv(self):
 
