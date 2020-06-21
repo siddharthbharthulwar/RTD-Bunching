@@ -109,6 +109,7 @@ class DataProcessor:
                 filewriter.writerow(ls)
                 print(index)
                 index+=1
+                print(index)
 
 
 
@@ -171,5 +172,5 @@ class DataProcessor:
 
         self.generateheatmap(self.globlons, self.globlats, 200, True)
 
+d = DataProcessor("rtd-data/data/06-19-20.csv")
 
-d = DataProcessor("rtd-data/data/06-10-20.csv")

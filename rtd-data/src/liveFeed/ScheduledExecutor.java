@@ -33,6 +33,7 @@ public class ScheduledExecutor {
      
     public static void main(String[] args) throws IOException {
     	
+    	System.out.println("Poller Started: 6 AM");
   
     	new ScheduledExecutor().scheduleRegularly(() -> {
     		
