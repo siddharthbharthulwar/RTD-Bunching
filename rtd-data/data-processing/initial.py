@@ -24,7 +24,6 @@ class Route:
 
         self.bunchinginstances.append(instance)
 
-
 class BusPosition:
 
     def __init__(self, latitude, longitude, routeid, directionid):

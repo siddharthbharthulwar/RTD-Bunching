@@ -3,41 +3,47 @@ import pandas as pd
 import cv2 as cv
 import numpy as np
 
-df = pd.read_csv(r"rtd-data\res\shapes.txt")
+class Point:
 
-a = df.groupby('shape_id')[['shape_pt_lat', 'shape_pt_lon', 'shape_pt_sequence', 'shape_dist_traveled']].apply(lambda g: g.values.tolist()).to_dict()
-img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
+    def __init__(self, latitude, longitude, index):
+        
+        self.latitude = latitude
+        self.longitude = longitude
+        self.index = index
 
-de = pd.read_csv(r"rtd-data\res\stops.txt")
+class Shape:
 
-stoplats = []
-stoplons = []
-colors = []
+    def __init__(self, shapeid):
+        
+        self.shapeid = shapeid
+        self.points = []
 
-for index, row in de.iterrows():
+class ShapeReader:
 
-    stoplats.append(row['stop_lat'])
-    stoplons.append(row['stop_lon'])
+    def __init__(self):
+        
+        df = pd.read_csv(r"rtd-data\res\shapes.txt")
 
-for i in range(0, len(stoplats)):
+        a = df.groupby('shape_id')[['shape_pt_lat', 'shape_pt_lon', 'shape_pt_sequence', 'shape_dist_traveled']].apply(lambda g: g.values.tolist()).to_dict()
 
-    colors.append(255)
+        self.shapes = {}
 
-colors = np.array(colors)
+        for key in a:
 
-for key in a:
+            b = a[key]
+            shapePoints = []
+            sh = Shape(key)
 
-    b = a[key]
+            for it in b:
 
-    lats = []
-    lons = []
+                pt = Point(it[0], it[1], it[2])
+                shapePoints.append(pt)
 
-    for ls in b:
+            sh.points = shapePoints
+            self.shapes[str(key)] = sh
 
-        lats.append(ls[0])
-        lons.append(ls[1])
 
-    plt.imshow(img[:,:,::-1], extent = [-105.2888, -104.6613, 39.5401, 40.0476])
-    plt.plot(lons, lats)
-    plt.scatter(stoplons, stoplats, c = colors , alpha = 0.5)
-    plt.show()
+
+
+
+

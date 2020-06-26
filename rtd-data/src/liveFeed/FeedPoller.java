@@ -21,7 +21,6 @@ import com.opencsv.CSVWriter;
 
 import kong.unirest.Unirest;
 import routeInfo.Trip;
-import routeInfo.TripsReader;
 
 public class FeedPoller extends Thread {
 	
@@ -35,7 +34,6 @@ public class FeedPoller extends Thread {
 		private int iterations;
 		private int seconds;
 		
-		public TripsReader tripsReader;
 		
 		public CSVWriter writer;
 		//public RoutesReader routesReader;  THIS PROBABLY ISNT NEEDED RIGHT NOW 
@@ -46,8 +44,6 @@ public class FeedPoller extends Thread {
 			
 			this.iterations = iterations;
 			this.seconds = seconds;
-			
-			this.tripsReader = new TripsReader();
 			
 			LocalDateTime date = LocalDateTime.now();
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yy");
@@ -90,25 +86,25 @@ public class FeedPoller extends Thread {
 						int index = 0;
 						
 						for (GtfsRealtime.FeedEntity entity: feed.getEntityList()) {
-							
 
 							GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
-							BusLocation location = new BusLocation();
-							location.setLatitude(vehiclePosition.getPosition().getLatitude());
-							location.setLongitude(vehiclePosition.getPosition().getLongitude());
-							location.setTimestamp(vehiclePosition.getTimestamp());
-							location.setTripID(vehiclePosition.getTrip().getTripId());
-							location.setDirectionID(Integer.toString(vehiclePosition.getTrip().getDirectionId()));
-							location.setDateTime(pollDateTime());
-														
-							String key = vehiclePosition.getTrip().getTripId();
-							
-							
-							if (index > 0 && key != null && !key.isEmpty()) {
-								location.setRouteID(this.tripsReader.getTrips().get(key).getRoute_id());
-								this.polls.put(key, location);
 
+							String routeID = vehiclePosition.getTrip().getRouteId();
+							
+							if (index > 0 && !routeID.isEmpty()){
+								
+								BusLocation location = new BusLocation();
+								location.setLatitude(vehiclePosition.getPosition().getLatitude());
+								location.setLongitude(vehiclePosition.getPosition().getLongitude());
+								location.setTimestamp(vehiclePosition.getTimestamp());
+								location.setRouteID(routeID);
+								location.setTripID(vehiclePosition.getTrip().getTripId());
+								location.setDirectionID(Integer.toString(vehiclePosition.getTrip().getDirectionId()));
+								location.setDateTime(pollDateTime());					
+								String key = vehiclePosition.getTrip().getTripId();
+								this.polls.put(key, location);
 							}
+							
 							index++;
 
 						}
@@ -189,12 +185,12 @@ public class FeedPoller extends Thread {
 			
 	}
 	
-	/*
+	
     public static void main(String[] args) throws IOException {
 		
 		FeedPoller poller = new FeedPoller(720, 60);		
 		poller.start();
 	}
-	*/
+	
 
 }
