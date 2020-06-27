@@ -147,6 +147,8 @@ public class FeedPoller extends Thread {
 			writer.close();
 		}
 
+		
+
 	public void run() {
 		
 		int index = 0;

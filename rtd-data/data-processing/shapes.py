@@ -18,6 +18,33 @@ class Shape:
         self.shapeid = shapeid
         self.points = []
 
+    def get_y(self):
+
+        ls = []
+
+        for pt in self.points:
+
+            ls.append(pt.latitude)
+
+        return ls
+
+    def get_x(self):
+
+        ls = []
+
+        for pt in self.points:
+
+            ls.append(pt.longitude)
+
+        return ls
+
+    def plot(self):
+
+        img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
+        plt.imshow(img[:,:,::-1], extent = [-105.2888, -104.6613, 39.5401, 40.0476])
+        plt.plot(self.get_x(), self.get_y())
+        plt.show()
+
 class ShapeReader:
 
     def __init__(self):
