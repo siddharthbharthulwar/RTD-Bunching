@@ -3,6 +3,8 @@ import csv
 from shapes import Shape, ShapeReader
 import cv2 as cv
 import matplotlib.pyplot as plt
+import csv
+import itertools
 
 df = pd.read_csv('rtd-data/res/trips.txt')
 dg = pd.read_csv('rtd-data/res/shapes.txt')
@@ -10,7 +12,9 @@ a = df.groupby('route_id')[['route_id', 'shape_id', 'direction_id', 'trip_id']].
 
 shapereader = ShapeReader()
 img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
-plt.imshow(img[:,:,::-1], extent = [-105.2888, -104.6613, 39.5401, 40.0476])
+
+
+realshapes = []
 
 for item in a:
 
@@ -41,8 +45,21 @@ for item in a:
                 maxindex = i
         
         realshape = currentshapes[maxindex]
-        plt.plot(realshape.get_x(), realshape.get_y())
+        realshape.addRouteID(item)
+        realshapes.append(realshape)
+        realshape.plot()
 
-plt.show()
+pathStr = "rtd-data/data-processing/data/" + "realShapes"  + ".csv"
 
+with open(pathStr, 'w', newline = '') as csvfile:
+
+    filewriter = csv.writer(csvfile, delimiter = ',', quotechar = '|', quoting = csv.QUOTE_MINIMAL)
+    filewriter.writerow(['Shape_ID', 'Route_ID', 'Latitude', 'Longitude'])
+
+    for shapeItem in realshapes:
+
+        for pt in shapeItem.points:
+
+            rowlistitem = [str(shapeItem.shapeid), str(shapeItem.routeID), str(pt.latitude), str(pt.longitude)]
+            filewriter.writerow(rowlistitem)
 

@@ -17,6 +17,11 @@ class Shape:
         
         self.shapeid = shapeid
         self.points = []
+        self.routeID = "nullValue"
+
+    def addRouteID(self, routeID):
+
+        self.routeID = routeID
 
     def get_y(self):
 
@@ -43,6 +48,11 @@ class Shape:
         img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
         plt.imshow(img[:,:,::-1], extent = [-105.2888, -104.6613, 39.5401, 40.0476])
         plt.plot(self.get_x(), self.get_y())
+
+        if not self.routeID == "nullValue":
+
+            plt.title(str(self.routeID))
+
         plt.show()
 
 class ShapeReader:
