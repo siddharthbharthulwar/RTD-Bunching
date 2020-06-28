@@ -140,11 +140,6 @@ class BunchingReader:
             plt.show()
 
             '''
-        
-    
-
-
-    
 
 b = BunchingReader("06-19-20")
 rt = b.routes['FF1']
