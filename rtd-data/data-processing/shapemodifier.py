@@ -17,37 +17,35 @@ img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
 realshapes = []
 
 for item in a:
-
-    if item != '0':
-
-        b = a[item]
-
-        currentshapes = []
-        currentshapelens = []
-
-        for thing in b:
-
-            sh = shapereader.shapes[str(thing[1])]
-            currentshapes.append(sh)
     
-        for i in currentshapes:
+    b = a[item]
 
-            currentshapelens.append(len(i.points))
+    currentshapes = []
+    currentshapelens = []
 
-        maxlen = currentshapelens[0]
-        maxindex = 0
+    for thing in b:
 
-        for i in range(0, len(currentshapelens)):
+        sh = shapereader.shapes[str(thing[1])]
+        currentshapes.append(sh)
 
-            if (currentshapelens[i] > maxlen):
+    for i in currentshapes:
 
-                maxlen = currentshapelens[i]
-                maxindex = i
-        
-        realshape = currentshapes[maxindex]
-        realshape.addRouteID(item)
-        realshapes.append(realshape)
-        realshape.plot()
+        currentshapelens.append(len(i.points))
+
+    maxlen = currentshapelens[0]
+    maxindex = 0
+
+    for i in range(0, len(currentshapelens)):
+
+        if (currentshapelens[i] > maxlen):
+
+            maxlen = currentshapelens[i]
+            maxindex = i
+    
+    realshape = currentshapes[maxindex]
+    realshape.addRouteID(item)
+    realshapes.append(realshape)
+    #realshape.plot()
 
 pathStr = "rtd-data/data-processing/data/" + "realShapes"  + ".csv"
 
