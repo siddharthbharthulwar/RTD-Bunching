@@ -147,7 +147,7 @@ class DataProcessor:
 
                 if not (math.isnan(i[0])):
                 
-                    ret = self.checklist(buses[routekey], 1000, routekey, key)
+                    ret = self.checklist(buses[routekey], 250, routekey, key)
                     lats = []
                     lons = []
 
@@ -164,5 +164,5 @@ class DataProcessor:
 
         self.generateheatmap(self.globlons, self.globlats, 200, True)
 
-d = DataProcessor("rtd-data/data/06-19-20.csv")
+d = DataProcessor("rtd-data/data/06-10-20.csv")
 

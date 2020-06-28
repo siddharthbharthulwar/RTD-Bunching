@@ -14,7 +14,7 @@ class BunchingInstance():
 
     def asString(self):
 
-        st = self.timestamp + " @ (" + self.latitude + ", " + self.longitude + ")"
+        st = str(self.timestamp) + " @ (" + str(self.latitude) + ", " + str(self.longitude) + ")"
         return st
 
 class Route:
@@ -93,36 +93,54 @@ class BunchingReader:
                 bi = BunchingInstance(i[0], i[1], i[2])
                 self.routes[item].bunching_instances.append(bi)
 
+        number_of_instances = 0
+
         for item in self.routes:
 
             rt = self.routes[item]
 
+            routeX = []
+            routeY = []
+
+            img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
+            plt.imshow(img[:,:,::-1], extent = [-105.2888, -104.6613, 39.5401, 40.0476])
+
             for bi in rt.bunching_instances:
 
-                img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
-                plt.imshow(img[:,:,::-1], extent = [-105.2888, -104.6613, 39.5401, 40.0476])
-
-                la, lb = rt.locate_two_closest_points(bi)
-
-                totalX = []
-                totalY = []
-
-                for ab in rt.shape:
-
-                    totalX.append(ab[1])
-                    totalY.append(ab[0])
-
-                plt.scatter(totalX, totalY)
-
-                plt.scatter(bi.longitude, bi.latitude)
-                plt.scatter(la[1], la[0])
-                plt.scatter(lb[1], lb[0])
 
 
+                routeX.append(bi.longitude)
+                routeY.append(bi.latitude)
 
+            plt.scatter(routeX, routeY)
+            plt.title(str(item))
+            plt.show()
+                
+            '''
+            img = cv.imread('rtd-data\data-processing\map.png', cv.IMREAD_COLOR)
+            plt.imshow(img[:,:,::-1], extent = [-105.2888, -104.6613, 39.5401, 40.0476])
 
-                plt.show()
+            la, lb = rt.locate_two_closest_points(bi)
 
+            totalX = []
+            totalY = []
+
+            for ab in rt.shape:
+
+                totalX.append(ab[1])
+                totalY.append(ab[0])
+
+            plt.scatter(totalX, totalY)
+
+            plt.scatter(bi.longitude, bi.latitude)
+            plt.scatter(la[1], la[0])
+            plt.scatter(lb[1], lb[0])
+            titleStr = bi.asString() + " route " + item
+            plt.title(titleStr)
+            plt.show()
+
+            '''
+        
     
 
 
