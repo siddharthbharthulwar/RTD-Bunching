@@ -79,14 +79,20 @@ class Route:
     def add_to_table(self, bunchinginstance):
 
         columnvals = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM']
-        timestampvals = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12' '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'] 
+        timestampvals = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'] 
 
-        if (len(str(bunchinginstance.timestamp)) == 2):
+        if (len(str(int(bunchinginstance.timestamp))) == 2):
 
             column_index = '12 AM' 
-        else:
+        elif (len(str(int(bunchinginstance.timestamp))) == 3):
 
+            idd = "0" + str(bunchinginstance.timestamp)[0]
+            column_index = columnvals[timestampvals.index(idd)]
+
+        else:
+            print(str(bunchinginstance.timestamp))
             column_index = columnvals[timestampvals.index(str(bunchinginstance.timestamp)[:2])]
+
         self.table.iloc[0, self.table.columns.get_loc(column_index)] +=1
 
     def show_table(self):
@@ -118,17 +124,21 @@ class BunchingReader:
 
         for item in temp:
             
-            r = Route(item, self.shapes[item])
-            self.routes[item] = r
+            if (item != 'MALL'):
+
+                r = Route(item, self.shapes[item])
+                self.routes[item] = r
 
         for item in temp:
 
-            b = temp[item]
+            if (item != 'MALL'):
 
-            for i in b:
-                
-                bi = BunchingInstance(i[0], i[1], i[2])
-                self.routes[item].bunching_instances.append(bi)
+                b = temp[item]
+
+                for i in b:
+                    
+                    bi = BunchingInstance(i[0], i[1], i[2])
+                    self.routes[item].bunching_instances.append(bi)
 
         number_of_instances = 0
 
@@ -149,4 +159,4 @@ class BunchingReader:
             
             rt.show_table()
         
-b = BunchingReader("06-19-20")
+b = BunchingReader("07-01-20")
