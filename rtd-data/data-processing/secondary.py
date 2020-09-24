@@ -6,6 +6,61 @@ import cv2 as cv
 import numpy as np
 import seaborn as sns
 
+def compare_timestamps(timestamp1, timestamp2):
+
+    time1 = int("1" + timestamp1)
+    time2 = int("1" + timestamp2)
+
+    if (time2 > time1):
+
+        return True
+
+    else:
+
+        return False
+
+def parseInitTimeStamp(timestamp):
+
+    timestamp = str(int(timestamp))
+
+    if (len(timestamp) == 1):
+
+        return "000" + timestamp
+
+    elif (len(timestamp) == 2):
+
+        return "00" + timestamp
+
+    elif (len(timestamp) == 3):
+
+        return "0" + timestamp
+
+    else:
+
+        return timestamp
+
+def getTimestamp(timestamp):
+
+    thresholdList = ["0000", "0030", "0100", "0130", "0200", "0230", "0300", "0330", "0400", "0430", "0500", "0530", "0600", "0630", "0700", "0730", "0800",
+    "0830", "0900", "0930", "1000", "1030", "1100", "1130", "1200", "1230", "1300", "1330", "1400", "1430", "1500", "1530", "1600", "1630", "1700", "1730", "1800",
+    "1830", "1900", "1930", "2000", "2030", "2100", "2130", "2200", "2230", "2300", "2330"]
+
+    labelList = ["12:00 AM", "12:30 AM", "1:00 AM", "1:30 AM", "2:00 AM", "2:30 AM", "3:00 AM", "3:30 AM", "4:00 AM", "4:30 AM", "5:00 AM", "5:30 AM", "6:00 AM",
+    "6:30 AM", "7:00 AM", "7:30 AM", "8:00 AM", "8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM", "1:00 PM",
+    "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM",
+    "9:00 PM","9:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM"]
+
+
+    for i in range(0, len(thresholdList)):
+
+        if (compare_timestamps(timestamp, thresholdList[i])):
+
+            threshold = thresholdList[i]
+    
+    return labelList[thresholdList.index(threshold)]
+
+    
+     
 class BunchingInstance():
 
     def __init__(self, timestamp, latitude, Longitude):
@@ -70,30 +125,20 @@ class Route:
 
     def initialize_table(self):
 
-        self.table = pd.DataFrame(columns = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM'])
+        self.table = pd.DataFrame(columns = ["12:00 AM", "12:30 AM", "1:00 AM", "1:30 AM", "2:00 AM", "2:30 AM", "3:00 AM", "3:30 AM", "4:00 AM", "4:30 AM", "5:00 AM", "5:30 AM", "6:00 AM",
+    "6:30 AM", "7:00 AM", "7:30 AM", "8:00 AM", "8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM", "1:00 PM",
+    "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM",
+    "9:00 PM","9:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM"])
             
-        ls = np.zeros(24).tolist()
+        ls = np.zeros(48).tolist()
         a_series = pd.Series(ls, index = self.table.columns)
         self.table = self.table.append(a_series, ignore_index=True)
 
     def add_to_table(self, bunchinginstance):
+        
+        ts = parseInitTimeStamp(bunchinginstance.timestamp)
 
-        columnvals = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM']
-        timestampvals = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'] 
-
-        if (len(str(int(bunchinginstance.timestamp))) == 2):
-
-            column_index = '12 AM' 
-        elif (len(str(int(bunchinginstance.timestamp))) == 3):
-
-            idd = "0" + str(bunchinginstance.timestamp)[0]
-            column_index = columnvals[timestampvals.index(idd)]
-
-        else:
-            print(str(bunchinginstance.timestamp))
-            column_index = columnvals[timestampvals.index(str(bunchinginstance.timestamp)[:2])]
-
-        self.table.iloc[0, self.table.columns.get_loc(column_index)] +=1
+        self.table.iloc[0, self.table.columns.get_loc(getTimestamp(ts))] +=1
 
     def show_table(self):
 

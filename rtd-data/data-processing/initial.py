@@ -7,6 +7,7 @@ import numpy.ma as ma
 import math
 import cv2 as cv
 import csv
+import os
 
 class Route:
 
@@ -91,6 +92,13 @@ class DataProcessor:
 
             plt.imshow(heatmap.T, extent = extent, origin = 'lower')
             plt.show()
+    '''
+    def generatefilledheatmap(self, xdata, ydata, bins, maskedBool):
+
+        heatmap, xedges, yedges = np.histogram2d(xdata, ydata, bins = bins)
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+
+    '''
 
     def saveBunchingInstances(self):
 
@@ -162,7 +170,39 @@ class DataProcessor:
 
             buses = None
 
-        self.generateheatmap(self.globlons, self.globlats, 200, True)
+        #self.generateheatmap(self.globlons, self.globlats, 200, False)
 
-d = DataProcessor("rtd-data/data/07-01-20.csv")
+d = DataProcessor("rtd-data/data/07-24-20.csv")
 
+class GlobalProcessor:
+
+    def add_data(self, globlons, globlats):
+
+        self.totallons.extend(globlons)
+        self.totallats.extend(globlats)
+
+    def __init__(self):
+        
+        self.totallons = []
+        self.totallats = []
+
+        for item in os.listdir('rtd-data\data'):
+
+            if (item[-3:] == 'csv'):
+
+                temp_process = DataProcessor(os.path.join('rtd-data\data', item))
+                self.add_data(temp_process.globlons, temp_process.globlats)
+
+            print(item)
+
+        self.total_heatmap(self.totallons, self.totallats, 500, False)
+
+    def total_heatmap(self, xdata, ydata, bins, maskedBool):
+
+        heatmap, xedges, yedges = np.histogram2d(xdata, ydata, bins = bins)
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+
+        plt.imshow(heatmap.T, extent = extent, origin = 'lower')
+        plt.show()
+
+gb = GlobalProcessor()
